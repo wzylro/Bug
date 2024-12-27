@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data</title>
+    <style>
+        /* 页面基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* 按钮样式 */
+        #fetchDataButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #fetchDataButton:hover {
+            background-color: #45a049;
+        }
+
+        /* 状态消息样式 */
+        #statusMessage {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+            #fetchDataButton {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+
+        .image-container img {
+         width: 48%; /* 设置每个图片占容器的 48% 宽度，使它们等宽并排列 */
+        height: auto; /* 保持图片的纵横比 */
+        /* 防止图片超出容器 */
+        }
+
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+            #fetchDataButton {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+        .image-row {
+        display: flex;
+        justify-content: space-between; /* 调整两张图片容器之间的间距 */
+         gap: 20px; /* 容器间距 */
+        }
+
+        .image-wrapper {
+            flex: 1; /* 每个容器占据等量空间 */
+            max-width: 48%; /* 每个容器的最大宽度 */
+            max-height: 500px;
+        }
+
+        .image-wrapper img {
+            width: 100%; /* 图片充满容器 */
+            height: auto; /* 保持图片比例 */
+        }
+    </style>
+</head>
+<body>
+    <h1>上证A股数据昨日统计</h1>
+
+    <button id="fetchDataButton">自动爬取数据</button>
+    <div id="statusMessage"></div>
+
+    <table id="stockTable" border="1">
+        <thead>
+            <tr>
+                <th>代码</th>
+                <th>名称</th>
+                <th>最新价</th>
+                <th>振幅</th>
+                <th>换手率</th>
+                <th>成交量(手)</th>
+                <th>成交额</th>
+                <th>市盈率</th>
+                <th>最低</th>
+                <th>最高</th>
+                <th>昨收</th>
+                <th>今开</th>
+                <th>量比</th>
+                <th>市净率</th>
+                <th>涨跌额</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+
+    </table>
+    <div class="image-row">
+    <div class="image-wrapper">
+        <img src="../static/成交量柱状图.png" alt="成交量柱状图">
+    </div>
+    <div class="image-wrapper">
+        <img src="../static/涨跌幅柱状图.png" alt="涨跌幅柱状图">
+    </div>
+        </div>
+
+    <script>
+        // Function to fetch and display stock data
+        function fetchStockData() {
+            fetch('/api/stocks') // API endpoint that provides stock data
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.querySelector("#stockTable tbody");
+                    tableBody.innerHTML = ""; // Clear existing rows
+                    data.forEach(stock => {
+                        const row = `
+                            <tr>
+                                <td>${stock.code}</td>
+                                <td>${stock.name}</td>
+                                <td>${stock.latestPrice}</td>
+                                <td>${stock.priceChange}</td>
+                                <td>${stock.changePercent}</td>
+                                <td>${stock.volume}</td>
+                                <td>${stock.turnover}</td>
+                                <td>${stock.amplitude}</td>
+                                <td>${stock.high}</td>
+                                <td>${stock.low}</td>
+                                <td>${stock.openPrice}</td>
+                                <td>${stock.closePrice}</td>
+                                <td>${stock.volumeRatio}</td>
+                                <td>${stock.turnoverRate}</td>
+                                <td>${stock.peRatio}</td>
+                                <td>${stock.pbRatio}</td>
+                            </tr>
+                        `;
+                        tableBody.insertAdjacentHTML("beforeend", row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                });
+        }
+
+        // Function to display crawling status
+        function showStatusMessage(message) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+        }
+
+        // Function to crawl stock data
+        function crawlStockData() {
+            showStatusMessage('正在爬取数据...');
+            setTimeout(() => {
+                fetch('/api/crawl', { method: 'POST' })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to trigger crawling');
+                        }
+                        showStatusMessage('数据爬取成功！');
+                        fetchStockData(); // Refresh data after crawling
+                    })
+                    .catch(error => {
+                        console.error('Error triggering crawl:', error);
+                        showStatusMessage('爬取失败，请重试！');
+                    });
+            }, 2000); // Simulate a delay for 2 seconds
+        }
+
+        // Attach event listener to the button
+        document.getElementById('fetchDataButton').addEventListener('click', crawlStockData);
+
+        // Initial data fetch
+        fetchStockData();
+    </script>
+</body>
+</html>
